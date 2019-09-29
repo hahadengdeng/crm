@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="crm.dao.EmployeesMapper" >
+    <resultMap id="EmployeesResult" type="employees">
+        <id column="empid" property="empid"></id>
+        <result column="username" property="username"></result>
+        <result column="password" property="password"></result>
+        <result column="tel" property="tel"></result>
+        <result column="name" property="name"></result>
+        <result column="email" property="email"></result>
+      <!--  <result column="deptid" property="deptid"></result>-->
+        <association property="dept" javaType="Dept">
+            <id column="deptid" property="deptid"></id>
+            <result column="deptname" property="deptname"></result>
+            <result column="deptinfo" property="deptinfo"></result>
+        </association>
+        <collection property="customerVisits" ofType="CustomerVisit">
+            <id column="id" property="id"></id>
+            <result column="content" property="content"></result>
+        </collection>
+    </resultMap>
+
+    <select id="login" parameterType="Employees" resultType="Employees">
+        select * from employees where username=#{username} and password=#{password}
+    </select>
+
+    <select id="selectAllCommissioner"  resultMap="EmployeesResult" parameterType="employees">
+        select e.*,d.deptname from employees e,dept d where e.deptid=d.deptid and e.deptid=2
+        <if test="username!=null and username !=''">
+            and username like "%"#{username}"%"
+        </if>
+    </select>
+
+    <select id="selectEmpById" parameterType="Integer" resultMap="EmployeesResult">
+        select e.*,d.deptname from employees e, dept d where e.deptid=d.deptid and e.empid=#{id}
+    </select>
+
+    <select id="selectByUsername" parameterType="Employees" resultMap="EmployeesResult">
+        select * from employees where username= #{username}
+    </select>
+
+    <insert id="register" parameterType="Employees">
+        insert into employees (username,password,tel,name,email,deptid)
+        values (#{username},#{password},#{tel},#{name},#{email},#{dept.deptid})
+    </insert>
+
+    <update id="modifyPassword" parameterType="Employees">
+        update employees set password=#{password} where username=#{username}
+    </update>
+
+    <select id="selectModify" parameterType="Employees" resultType="Employees">
+        SELECT * FROM employees WHERE username=#{username} AND empid !=#{empid}
+    </select>
+
+    <update id="modifyCom" parameterType="Employees">
+        UPDATE employees SET username=#{username} , tel=#{tel} ,`name`=#{name},email=#{email},deptid=#{dept.deptid} WHERE empid=#{empid}
+    </update>
+
+    <delete id="deleteCom" parameterType="Integer">
+        delete from employees where empid=#{empid}
+    </delete>
+
+    <select id="selectAllEmp" resultType="employees" >
+        select * from employees where deptid=2
+    </select>
+
+    <select id="selectAllManager" resultMap="EmployeesResult" parameterType="employees">
+        select e.*,d.deptname from employees e, dept d where e.deptid=d.deptid and d.deptid=1
+        <if test="name!=null and name!=''">
+            and e.name like "%"#{name}"%"
+        </if>
+    </select>
+
+    <select id="selectEmpNotAdmin" resultMap="EmployeesResult">
+         select e.*,d.* from employees e, dept d where e.deptid=d.deptid and d.deptid !=3
+    </select>
+
+    <update id="modifyRole" parameterType="employees">
+        update  employees set deptid=#{dept.deptid} where empid=#{empid}
+    </update>
+
+    <update id="resetPassword" parameterType="Employees">
+        update employees set password=#{password} where empid=#{empid}
+    </update>
+</mapper>

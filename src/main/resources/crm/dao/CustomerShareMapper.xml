@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="crm.dao.CustomerShareMapper">
+    <resultMap id="CustomerShareResult" type="CustomerShare">
+        <id property="id" column="id" />
+
+        <association property="customer" javaType="Customer">
+            <id column="cid" property="cid"></id>
+            <result column="cusname" property="cusname"></result>
+            <result column="address" property="address"></result>
+            <result column="contact" property="contact"></result>
+            <result column="tel" property="tel"></result>
+            <result column="email" property="email"></result>
+        </association>
+        <association property="employees" javaType="Employees">
+            <id column="empid" property="empid"></id>
+            <result column="username" property="username"></result>
+            <result column="password" property="password"></result>
+            <result column="tel" property="tel"></result>
+            <result column="name" property="name"></result>
+            <result column="email" property="email"></result>
+            <result column="emptype" property="emptype"></result>
+        </association>
+    </resultMap>
+    
+    <select id="checkDeleteEmp" parameterType="Integer" resultMap="CustomerShareResult">
+        SELECT * from customershare cs,employees e WHERE e.empid=cs.empid AND e.empid=#{empid}
+    </select>
+
+    <insert id="insertMoreShare" parameterType="list">
+        insert into customershare (cid,empid) values
+        <foreach collection="list" item="a" open="" close="" separator=",">
+            (#{a.customer.cid},#{a.employees.empid})
+        </foreach>
+    </insert>
+
+    <delete id="managerDeleteCs" parameterType="Integer">
+        delete from customershare where cid=#{cid}
+    </delete>
+
+    <select id="selectCvByCid" parameterType="int" resultMap="CustomerShareResult">
+        SELECT c.*,e.*,cs.* FROM customershare cs,customer c,employees e WHERE cs.cid=c.cid AND cs.empid=e.empid AND c.cid=#{cid}
+    </select>
+
+    <update id="modifyVs" parameterType="list">
+        <foreach collection="list" item="a" open="" close="" separator=";">
+            update customershare set cid=#{a.customer.cid} , empid=#{a.employees.empid} where id=#{a.id}
+        </foreach>
+    </update>
+    
+</mapper>

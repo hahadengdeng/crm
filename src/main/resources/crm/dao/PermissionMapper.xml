@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="crm.dao.PermissionMapper">
+    <resultMap id="perResult" type="Permission">
+        <id column="permissionid" property="permissionid"/>
+        <result column="pname" property="pname"/>
+        <result column="purl" property="purl"/>
+        <result column="ismenu" property="ismenu"/>
+        <result column="parentid" property="parentid"/>
+        <result column="pinfo" property="pinfo"/>
+        
+        <collection property="list" select="selectByParentId" column="permissionid">
+        </collection>
+    </resultMap>
+
+    <select id="selectByParentId" parameterType="int" resultMap="perResult">
+        select * from permission where  parentid=#{id} and ismenu=1
+    </select>
+
+    <select id="selectAllPerByMenu" resultMap="perResult">
+        select * from  permission where parentid=0
+    </select>
+</mapper>

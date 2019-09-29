@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="crm.dao.CustomerMapper">
+    <resultMap id="customerResult" type="customer">
+        <id column="cid" property="cid"></id>
+        <result column="cusname" property="cusname"></result>
+        <result column="address" property="address"></result>
+        <result column="contact" property="contact"></result>
+        <result column="tel" property="tel"></result>
+        <result column="email" property="email"></result>
+        <collection property="employees" ofType="Employees">
+            <id column="empid" property="empid"></id>
+            <result column="username" property="username"></result>
+            <result column="name" property="name"></result>
+        </collection>
+    </resultMap>
+    <select id="selectAllCus" resultMap="customerResult">
+        SELECT c.*,e.`name`,e.empid FROM customer c,customershare cs,employees e WHERE c.cid=cs.cid AND cs.empid=e.empid order by c.cid asc
+    </select>
+
+    <insert id="insertCus" parameterType="customer">
+        <selectKey keyColumn="cid" keyProperty="cid" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into customer (cusname,address,contact,tel,email) values (#{cusname},#{address},#{contact},#{tel},#{email})
+    </insert>
+
+    <select id="selectCusByCusName" parameterType="String" resultType="customer">
+        select * from customer where cusname=#{cusname}
+    </select>
+
+    <delete id="managerDeleteCus" parameterType="Integer">
+        delete from customer where cid=#{cid}
+    </delete>
+
+    <select id="selectCusByCid" parameterType="Integer" resultMap="customerResult">
+          SELECT c.*,e.username,e.empid FROM customer c,customershare cs,employees e WHERE c.cid=cs.cid AND cs.empid=e.empid and c.cid=#{cid} order by c.cid asc
+    </select>
+
+    <select id="selectCusByOp" parameterType="customer" resultType="customer">
+        select * from customer where cusname=#{cusname} and cid!=#{cid}
+    </select>
+
+    <update id="modifyCus">
+        UPDATE customer SET cusname=#{cusname} ,address=#{address},contact=#{contact},tel=#{tel},email=#{email} WHERE cid=#{cid}
+    </update>
+
+    <select id="selectAllCusNull" resultType="customer">
+        SELECT * from customer
+    </select>
+
+    <select id="selectCusByCom" resultMap="customerResult" parameterType="customer">
+        SELECT c.*,e.`name`,e.empid FROM customer c,customershare cs,employees e WHERE c.cid=cs.cid AND cs.empid=e.empid AND e.username=#{username}
+        <if test="username !=null and username!=''">
+            and e.username=#{username}
+        </if>
+        <if test="cusname!=null and cusname!=''">
+            and c.cusname like "%"#{cusname}"%"
+        </if>
+
+        order by c.cid asc
+    </select>
+
+    <select id="selectAllCusPage" resultType="customer" parameterType="customer">
+        SELECT * from customer
+        <where>
+            <if test="cusname!=null and cusname!=''">
+                and cusname like "%"#{cusname}"%"
+            </if>
+        </where>
+    </select>
+<!--    <select id="selectCusByOps"  parameterType="customer" resultType="customer">
+        SELECT * from customer
+        <where>
+            <if test="cid !=0">
+                and cid=#{cid}
+            </if>
+        </where>
+    </select>-->
+</mapper>
